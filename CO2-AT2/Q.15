@@ -1,1 +1,51 @@
+clc;
+clear;
+close all;
+N = 8;                  % Number of antenna elements
+f = 3e9;                % Frequency (3 GHz)
+c = 3e8;                % Speed of light
+lambda = c/f;           % Wavelength
+d = lambda/2;           % Element spacing
+theta0 = 30;            % Steering angle (degrees)
+
+theta = -90:0.1:90;     % Observation angles
+w = hamming(N);
+AF = zeros(size(theta));
+for k = 1:length(theta)
+    psi = 2*pi*d/lambda*(sind(theta(k))-sind(theta0));
+    sumAF = 0;
+
+    for n = 1:N
+        sumAF = sumAF + w(n)*exp(1j*(n-1)*psi);
+    end
+
+    AF(k) = abs(sumAF);
+end
+AF = AF/max(AF);
+Gain_dB = 20*log10(AF+eps);
+index = find(Gain_dB >= -3);
+BeamWidth = theta(index(end)) - theta(index(1));
+MaxGain = max(Gain_dB);
+figure;
+plot(theta,Gain_dB,'b','LineWidth',2);
+grid on;
+xlabel('Angle (Degrees)');
+ylabel('Normalized Gain (dB)');
+title('Beam Steering using Uniform Linear Array');
+axis([-90 90 -60 5]);
+hold on;
+plot(theta0,0,'ro','MarkerFaceColor','r');
+text(-85,-8,['Frequency = ' num2str(f/1e9) ' GHz']);
+text(-85,-14,['Scan Angle = ' num2str(theta0) '°']);
+text(-85,-20,['Beam Width = ' num2str(BeamWidth,'%.2f') '°']);
+text(-85,-26,['Max Gain = ' num2str(MaxGain,'%.2f') ' dB']);
+hold off;
+disp('------------------------------------');
+disp('Beam Steering Simulation Results');
+disp('------------------------------------');
+fprintf('Frequency      : %.1f GHz\n',f/1e9);
+fprintf('Scan Angle     : %.1f Degrees\n',theta0);
+fprintf('Beam Width     : %.2f Degrees\n',BeamWidth);
+fprintf('Maximum Gain   : %.2f dB\n',MaxGain);
+disp('Sidelobes Reduced using Hamming Window');
 
