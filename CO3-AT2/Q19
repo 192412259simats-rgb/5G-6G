@@ -1,0 +1,93 @@
+clc;
+clear;
+close all;
+
+% Number of users
+N = 50;
+
+% Total available bandwidth in MHz
+totalBandwidth = 100;
+
+% LTE and 5G spectrum allocation
+LTE_BW = 40;
+G5_BW = 60;
+
+% Number of LTE and 5G users
+LTE_users = 20;
+G5_users = 30;
+
+% Transmit power in dBm
+LTE_power = 23;
+G5_power = 26;
+
+% Noise power in dBm
+noise_power = -100;
+
+% Interference factor
+interference_factor = 0.08;
+
+% Calculate bandwidth per user
+LTE_user_BW = LTE_BW / LTE_users;
+G5_user_BW = G5_BW / G5_users;
+
+% Convert power from dBm to mW
+LTE_Power_mW = 10^(LTE_power/10);
+G5_Power_mW = 10^(G5_power/10);
+Noise_mW = 10^(noise_power/10);
+
+% Calculate interference
+LTE_interference = interference_factor * G5_Power_mW;
+G5_interference = interference_factor * LTE_Power_mW;
+
+% SINR calculation
+LTE_SINR = LTE_Power_mW / (Noise_mW + LTE_interference);
+G5_SINR = G5_Power_mW / (Noise_mW + G5_interference);
+
+% Shannon capacity
+LTE_capacity = LTE_user_BW * log2(1 + LTE_SINR);
+G5_capacity = G5_user_BW * log2(1 + G5_SINR);
+
+% Total throughput
+LTE_total = LTE_capacity * LTE_users;
+G5_total = G5_capacity * G5_users;
+
+% Display results
+fprintf('Spectrum Sharing Between LTE and 5G\n');
+fprintf('---------------------------------------\n');
+fprintf('Total Bandwidth       = %.2f MHz\n', totalBandwidth);
+fprintf('LTE Bandwidth         = %.2f MHz\n', LTE_BW);
+fprintf('5G Bandwidth          = %.2f MHz\n', G5_BW);
+
+fprintf('\nLTE Results\n');
+fprintf('Users                 = %d\n', LTE_users);
+fprintf('Bandwidth/User        = %.2f MHz\n', LTE_user_BW);
+fprintf('SINR                  = %.2f\n', LTE_SINR);
+fprintf('Total Throughput      = %.2f Mbps\n', LTE_total);
+
+fprintf('\n5G Results\n');
+fprintf('Users                 = %d\n', G5_users);
+fprintf('Bandwidth/User        = %.2f MHz\n', G5_user_BW);
+fprintf('SINR                  = %.2f\n', G5_SINR);
+fprintf('Total Throughput      = %.2f Mbps\n', G5_total);
+
+% Plot bandwidth allocation
+figure;
+
+subplot(1,2,1);
+bar([LTE_BW G5_BW]);
+set(gca,'XTickLabel',{'LTE','5G'});
+xlabel('Technology');
+ylabel('Bandwidth (MHz)');
+title('Spectrum Allocation');
+grid on;
+
+% Plot throughput
+subplot(1,2,2);
+bar([LTE_total G5_total]);
+set(gca,'XTickLabel',{'LTE','5G'});
+xlabel('Technology');
+ylabel('Throughput (Mbps)');
+title('Throughput Comparison');
+grid on;
+
+sgtitle('LTE and 5G Spectrum Sharing Model');
